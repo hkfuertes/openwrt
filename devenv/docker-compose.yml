@@ -1,0 +1,28 @@
+services:
+  chown-fix:
+    image: alpine:latest
+    command: >
+      sh -c "chown -R 1000:1000 /home/builder/openwrt/dl"
+    volumes:
+      - dl:/home/builder/openwrt/dl
+    user: root
+    restart: "no"
+
+  builder:
+    build:
+      context: ..
+      dockerfile: devenv/Dockerfile
+    container_name: openwrt-builder
+    working_dir: /home/builder/openwrt
+    stdin_open: true
+    tty: true
+    volumes:
+      - ..:/home/builder/openwrt
+      - dl:/home/builder/openwrt/dl
+    command: ["/bin/bash"]
+    depends_on:
+      chown-fix:
+        condition: service_completed_successfully
+
+volumes:
+  dl:
