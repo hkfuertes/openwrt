@@ -11,6 +11,13 @@ PKG_MAINTAINER:=Miguel Fuertes <hkfuertes@gmail.com>
 
 include $(INCLUDE_DIR)/package.mk
 
+define Build/Prepare
+	mkdir -p $(PKG_BUILD_DIR)
+endef
+
+define Build/Compile
+endef
+
 define Package/$(PKG_NAME)
 	SECTION:=utils
 	CATEGORY:=Utilities
