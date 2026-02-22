@@ -3,8 +3,8 @@
 ifeq ($(SUBTARGET),msm8916)
 
 define Build/generate-squashfs-gpt
-  chmod +x $(TOPDIR)/target/linux/$(BOARD)/image/generate_squahsfs_gpt.sh
-  $(TOPDIR)/target/linux/$(BOARD)/image/generate_squahsfs_gpt.sh $@
+  chmod +x $(TOPDIR)/target/linux/$(BOARD)/image/generate_squashfs_gpt.sh
+  $(TOPDIR)/target/linux/$(BOARD)/image/generate_squashfs_gpt.sh $@
 endef
 
 define Build/install-flasher

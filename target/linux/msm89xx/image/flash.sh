@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
-# Prerequisites: EDL mode and fastboot.
-# Usage: Execute from bin/targets/XXX/YYY/ directory
-# Notes:
-# - Automatically detects "*-firmware.zip" in the current directory, extracts .mbn files to a temp dir, and uses them.
-# - Falls back to manual directory selection if the ZIP is not found.
+#!/bin/bash
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# Flash OpenWrt to MSM8916 devices via EDL + fastboot.
+# Prerequisites: edl, fastboot
+# Usage: run from the build output directory (bin/targets/...)
 
 set -euo pipefail
 
@@ -97,7 +97,7 @@ fi
 
 # Confirm before flashing.
 echo
-read -p "Continue with flashing? (y/N): " confirm
+read -r -p "Continue with flashing? (y/N): " confirm
 if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
     echo "[!] Cancelled"
     exit 0
@@ -119,9 +119,15 @@ echo "=== Flashing Partitions (EDL) ==="
 echo "[*] Flashing aboot via EDL..."
 edl w aboot "$firmware_dir/aboot.mbn" || { echo "[-] Error flashing aboot"; exit 1; }
 
-# Reboot to fastboot using EDL commands.
+# Reboot to fastboot: erase boot partition and write BCB to misc so
+# lk1st (aboot) enters fastboot on next boot (Android misc still present).
 echo "[*] Rebooting to fastboot..."
-edl e boot || { echo "[-] Error rebooting to fastboot"; exit 1; }
+edl e boot || { echo "[-] Error erasing boot partition"; exit 1; }
+misc_bcb="$(mktemp)"
+dd if=/dev/zero bs=1088 count=1 of="$misc_bcb" 2>/dev/null
+printf 'bootonce-bootloader' | dd of="$misc_bcb" conv=notrunc 2>/dev/null
+edl w misc "$misc_bcb" || { echo "[-] Error writing BCB to misc"; exit 1; }
+rm -f "$misc_bcb"
 edl reset || { echo "[-] Error resetting device"; exit 1; }
 
 # Wait for fastboot to come up.
