@@ -1,9 +1,4 @@
 #!/bin/sh
-set -e
-
-# Enabling WiFi
-uci set wireless.@wifi-device[0].disabled='0'
-uci set wireless.@wifi-iface[0].disabled='0'
 
 # Create modem interface
 uci set network.modem=interface
@@ -21,7 +16,4 @@ uci add_list firewall.@zone[1].network='modem'
 uci -q del_list "network.@device[0].ports=eth0" 2>/dev/null || true
 sed -i 's/"device": "eth0"/"device": "br-lan"/g' /etc/board.json
 
-# Commit all changes
 uci commit
-
-exit 0
